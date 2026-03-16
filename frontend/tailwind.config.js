@@ -8,30 +8,34 @@ export default {
   theme: {
     extend: {
       colors: {
-        border: "hsl(214.3 31.8% 91.4%)",
-        input: "hsl(214.3 31.8% 91.4%)",
-        ring: "hsl(221.2 83.2% 53.3%)",
-        background: "hsl(222.2 84% 4.9%)",
-        foreground: "hsl(210 40% 98%)",
+        border: "hsl(var(--color-border))",
+        input: "hsl(var(--color-input))",
+        ring: "hsl(var(--color-ring))",
+        background: "hsl(var(--color-background))",
+        foreground: "hsl(var(--color-foreground))",
         primary: {
-          DEFAULT: "hsl(221.2 83.2% 53.3%)",
-          foreground: "hsl(210 40% 98%)",
+          DEFAULT: "hsl(var(--color-primary))",
+          foreground: "hsl(var(--color-primary-foreground))",
         },
         secondary: {
-          DEFAULT: "hsl(217.2 32.6% 17.5%)",
-          foreground: "hsl(210 40% 98%)",
+          DEFAULT: "hsl(var(--color-secondary))",
+          foreground: "hsl(var(--color-secondary-foreground))",
         },
         accent: {
-          DEFAULT: "hsl(38 92% 50%)",
-          foreground: "hsl(222.2 47.4% 11.2%)",
+          DEFAULT: "hsl(var(--color-accent))",
+          foreground: "hsl(var(--color-accent-foreground))",
         },
         muted: {
-          DEFAULT: "hsl(217.2 32.6% 17.5%)",
-          foreground: "hsl(215 20.2% 65.1%)",
+          DEFAULT: "hsl(var(--color-muted))",
+          foreground: "hsl(var(--color-muted-foreground))",
         },
         card: {
-          DEFAULT: "hsl(222.2 47.4% 11.2%)",
-          foreground: "hsl(210 40% 98%)",
+          DEFAULT: "hsl(var(--color-card))",
+          foreground: "hsl(var(--color-card-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--color-destructive))",
+          foreground: "hsl(var(--color-destructive-foreground))",
         },
       },
       borderRadius: {
