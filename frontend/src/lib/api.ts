@@ -1,4 +1,4 @@
-import { api } from '../api/client';
-
-export { api };
-export default api;
+/**
+ * Re-export api client
+ */
+export { api } from '../api/client';
