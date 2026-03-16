@@ -5,7 +5,7 @@ import { Input } from '../components/ui/Input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../lib/api';
+import { useNavigate } from 'react-router-dom';
 import { useToast } from '../components/ui/Toast';
 
 interface AnalysisResult {
@@ -37,7 +37,6 @@ export const RenewalPage: React.FC = () => {
   const [improvements, setImprovements] = useState<ImprovementSuggestions | null>(null);
   const [renewedContent, setRenewedContent] = useState<any>(null);
   
-  const navigate = useNavigate();
   const toast = useToast();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
