@@ -246,11 +246,7 @@ export const ProjectDetailPage: React.FC = () => {
         >
           <Card
             className="w-full max-w-md p-6 space-y-4 animate-scale-in"
-            onClick={(e: React.MouseEvent) => {
-  e.stopPropagation();
-  setShowExportModal(true);
-}}
-
+            onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-2xl font-bold">플랫폼 선택</h2>
             <p className="text-muted-foreground">어느 플랫폼으로 내보낼까요?</p>
