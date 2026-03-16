@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Sparkles, LogOut, Menu, X, RefreshCw } from 'lucide-react';
 import LoginPage from './pages/LoginPage';
@@ -7,13 +7,11 @@ import { TemplateGalleryPage } from './pages/TemplateGalleryPage';
 import { CreateProjectPage } from './pages/CreateProjectPage';
 import { ProjectDetailPage } from './pages/ProjectDetailPage';
 import { RenewalPage } from './pages/RenewalPage';
-import type { User } from './types';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
   const location = useLocation();
 
-  // 로그인 페이지에서는 레이아웃 미표시
   if (location.pathname === '/login' || location.pathname === '/signup') {
     return <>{children}</>;
   }
@@ -26,7 +24,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   return (
     <div className="flex h-screen bg-background">
-      {/* 사이드바 */}
       <aside
         className={`
           fixed lg:static inset-y-0 left-0 z-50 w-64 bg-card border-r border-white/10
@@ -35,7 +32,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         `}
       >
         <div className="flex flex-col h-full">
-          {/* 로고 */}
           <div className="flex items-center justify-between p-6 border-b border-white/10">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center text-2xl">
@@ -54,7 +50,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </button>
           </div>
 
-          {/* 네비게이션 */}
           <nav className="flex-1 p-4 space-y-2">
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -79,7 +74,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             })}
           </nav>
 
-          {/* 사용자 정보 */}
           <div className="p-4 border-t border-white/10">
             <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary">
               <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold">
@@ -97,7 +91,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </div>
       </aside>
 
-      {/* 모바일 오버레이 */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
@@ -105,9 +98,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         />
       )}
 
-      {/* 메인 컨텐츠 */}
       <main className="flex-1 overflow-auto">
-        {/* 모바일 헤더 */}
         <div className="lg:hidden sticky top-0 z-30 bg-card border-b border-white/10 px-6 py-4 flex items-center justify-between">
           <button
             onClick={() => setSidebarOpen(true)}
@@ -119,7 +110,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <div className="text-2xl">🚀</div>
             <span className="font-bold">Wadiz Builder</span>
           </div>
-          <div className="w-10" /> {/* Spacer for center alignment */}
+          <div className="w-10" />
         </div>
 
         {children}
@@ -129,13 +120,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 };
 
 function App() {
-  const [user, setUser] = useState<User | null>(null);
-
   return (
     <BrowserRouter>
       <Layout>
         <Routes>
-          <Route path="/login" element={<LoginPage setUser={setUser} />} />
+          <Route path="/login" element={<LoginPage setUser={() => {}} />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/templates" element={<TemplateGalleryPage />} />
           <Route path="/create" element={<CreateProjectPage />} />
