@@ -31,10 +31,11 @@ export const DashboardPage: React.FC = () => {
   const loadProjects = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/projects');
-      setProjects(response.data);
+      const response = await api.getProjects();
+      setProjects(response);
     } catch (error) {
       console.error('프로젝트 로딩 실패:', error);
+      setProjects([]);
     } finally {
       setLoading(false);
     }
@@ -74,7 +75,6 @@ export const DashboardPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* 헤더 */}
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <h1 className="text-4xl font-bold tracking-tight">프로젝트</h1>
@@ -92,7 +92,6 @@ export const DashboardPage: React.FC = () => {
           </Button>
         </div>
 
-        {/* 검색 및 필터 */}
         <div className="flex items-center gap-4">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -128,7 +127,6 @@ export const DashboardPage: React.FC = () => {
           </div>
         </div>
 
-        {/* 프로젝트 그리드 */}
         {loading ? (
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -171,7 +169,6 @@ export const DashboardPage: React.FC = () => {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        // 메뉴 열기 로직
                       }}
                       className="p-2 hover:bg-secondary rounded-lg transition-colors"
                     >
