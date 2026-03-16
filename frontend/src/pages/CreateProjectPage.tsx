@@ -1,389 +1,297 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, ArrowRight, Sparkles, Check } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { ArrowLeft, Sparkles, FileText, Image as ImageIcon, Palette, Zap } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { Card, CardContent } from '../components/ui/Card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { api } from '../lib/api';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useToast } from '../hooks/useToast';
+import type { Template } from '../types';
 
-interface Template {
-  id: number;
-  name: string;
-  description: string;
-  category_id: number;
-  success_rate: number;
-  preview_image_url?: string;
+interface GenerateRequest {
+  project_name: string;
+  product_name: string;
+  product_description: string;
+  target_audience: string;
+  key_features: string[];
+  template_id?: number;
 }
 
 export const CreateProjectPage: React.FC = () => {
-  const [step, setStep] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [templates, setTemplates] = useState<Template[]>([]);
   const navigate = useNavigate();
   const location = useLocation();
-
-  const [formData, setFormData] = useState({
-    template_id: (location.state as any)?.templateId || null,
+  const { toast } = useToast();
+  
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState<GenerateRequest>({
     project_name: '',
     product_name: '',
-    usp: '',
+    product_description: '',
     target_audience: '',
-    brand_tone: 'professional' as 'professional' | 'friendly' | 'premium',
-    platforms: ['wadiz'] as string[],
+    key_features: ['']
   });
 
   useEffect(() => {
     loadTemplates();
-  }, []);
+    if (location.state?.templateId) {
+      setSelectedTemplateId(location.state.templateId);
+    }
+  }, [location.state]);
 
   const loadTemplates = async () => {
     try {
-      const response = await api.getTemplates();
-      setTemplates(response);
-      if ((location.state as any)?.templateId) {
-        setFormData(prev => ({ ...prev, template_id: (location.state as any).templateId }));
-        setStep(2);
-      }
+      const data = await api.getTemplates();
+      setTemplates(data);
     } catch (error) {
       console.error('템플릿 로딩 실패:', error);
-      setTemplates([]);
+      toast({
+        title: '템플릿 로딩 실패',
+        description: '템플릿 목록을 불러올 수 없습니다.',
+        variant: 'destructive'
+      });
     }
   };
 
-  const handleNext = () => {
-    if (step < 3) setStep(step + 1);
+  const handleFeatureChange = (index: number, value: string) => {
+    const newFeatures = [...formData.key_features];
+    newFeatures[index] = value;
+    setFormData({ ...formData, key_features: newFeatures });
   };
 
-  const handleBack = () => {
-    if (step > 1) setStep(step - 1);
+  const addFeature = () => {
+    if (formData.key_features.length < 10) {
+      setFormData({ ...formData, key_features: [...formData.key_features, ''] });
+    }
+  };
+
+  const removeFeature = (index: number) => {
+    if (formData.key_features.length > 1) {
+      const newFeatures = formData.key_features.filter((_, i) => i !== index);
+      setFormData({ ...formData, key_features: newFeatures });
+    }
   };
 
   const handleGenerate = async () => {
+    if (!formData.project_name || !formData.product_name || !formData.product_description) {
+      toast({
+        title: '필수 항목을 입력해주세요',
+        description: '프로젝트명, 제품명, 제품 설명은 필수입니다.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     try {
       setLoading(true);
-      const response = await api.generateWadizPage({
-        template_id: formData.template_id!,
-        product_name: formData.product_name,
-        usp: formData.usp,
-        target_audience: formData.target_audience,
-        brand_tone: formData.brand_tone,
+      const payload = {
+        ...formData,
+        template_id: selectedTemplateId || undefined,
+        key_features: formData.key_features.filter(f => f.trim() !== '')
+      };
+      
+      const result = await api.generateWadizPage(payload);
+      
+      toast({
+        title: '페이지 생성 완료!',
+        description: 'AI가 와디즈 상세페이지를 생성했습니다.',
+        variant: 'default'
       });
       
-      navigate(`/project/${response.project_id}`);
-    } catch (error) {
+      navigate(`/project/${result.project_id}`);
+    } catch (error: any) {
       console.error('생성 실패:', error);
-      alert('프로젝트 생성에 실패했습니다.');
+      toast({
+        title: '생성 실패',
+        description: error.response?.data?.detail || '페이지 생성 중 오류가 발생했습니다.',
+        variant: 'destructive'
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const isStepValid = () => {
-    if (step === 1) return formData.template_id !== null;
-    if (step === 2) return formData.project_name && formData.product_name && formData.usp && formData.target_audience;
-    return true;
-  };
-
   return (
     <div className="min-h-screen bg-background p-6">
-      <div className="max-w-5xl mx-auto space-y-8">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="p-2 hover:bg-secondary rounded-lg transition-colors"
-          >
-            <ArrowLeft className="h-6 w-6" />
-          </button>
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold">새 프로젝트 만들기</h1>
-            <p className="text-muted-foreground">3단계로 빠르게 시작하세요</p>
-          </div>
-        </div>
+      <div className="max-w-4xl mx-auto">
+        <Button
+          variant="ghost"
+          className="mb-6"
+          onClick={() => navigate('/dashboard')}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          돌아가기
+        </Button>
 
-        <div className="flex items-center justify-between max-w-2xl mx-auto">
-          {[
-            { num: 1, label: '템플릿 선택' },
-            { num: 2, label: '정보 입력' },
-            { num: 3, label: 'AI 생성' },
-          ].map((s, idx) => (
-            <React.Fragment key={s.num}>
-              <div className="flex flex-col items-center gap-2">
-                <div
-                  className={`
-                    w-12 h-12 rounded-full flex items-center justify-center font-bold transition-all
-                    ${step === s.num
-                      ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/50 scale-110'
-                      : step > s.num
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-secondary text-muted-foreground'
-                    }
-                  `}
-                >
-                  {step > s.num ? <Check className="h-6 w-6" /> : s.num}
-                </div>
-                <span className={`text-sm font-medium ${step >= s.num ? 'text-foreground' : 'text-muted-foreground'}`}>
-                  {s.label}
-                </span>
+        <div className="space-y-8">
+          <div>
+            <h1 className="text-4xl font-bold mb-2">새 프로젝트 만들기</h1>
+            <p className="text-muted-foreground">
+              AI가 와디즈 펀딩 상세페이지를 자동으로 생성해드립니다
+            </p>
+          </div>
+
+          {/* 템플릿 선택 섹션 */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Palette className="h-5 w-5" />
+                템플릿 선택 (선택사항)
+              </CardTitle>
+              <CardDescription>
+                성공한 펀딩 프로젝트의 레이아웃을 기반으로 생성합니다
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {templates.slice(0, 6).map((template) => (
+                  <div
+                    key={template.id}
+                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all hover:shadow-lg ${
+                      selectedTemplateId === template.id
+                        ? 'border-primary bg-primary/5'
+                        : 'border-border'
+                    }`}
+                    onClick={() => setSelectedTemplateId(template.id)}
+                  >
+                    <div className="aspect-video bg-gradient-to-br from-primary/20 to-primary/5 rounded mb-3"></div>
+                    <h4 className="font-semibold mb-1">{template.name}</h4>
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {template.description}
+                    </p>
+                    {selectedTemplateId === template.id && (
+                      <Badge className="mt-2">선택됨</Badge>
+                    )}
+                  </div>
+                ))}
               </div>
-              {idx < 2 && (
-                <div className={`flex-1 h-1 mx-4 rounded transition-colors ${step > s.num ? 'bg-primary' : 'bg-secondary'}`} />
-              )}
-            </React.Fragment>
-          ))}
-        </div>
+            </CardContent>
+          </Card>
 
-        {step === 1 && (
-          <div className="space-y-6 animate-fade-in">
-            <div className="text-center space-y-2">
-              <h2 className="text-2xl font-bold">템플릿을 선택하세요</h2>
-              <p className="text-muted-foreground">검증된 템플릿으로 시작하면 성공 확률이 높아집니다</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {templates.map((template) => (
-                <Card
-                  key={template.id}
-                  hoverable
-                  className={`cursor-pointer transition-all ${
-                    formData.template_id === template.id ? 'ring-2 ring-primary shadow-lg shadow-primary/50' : ''
-                  }`}
-                  onClick={() => setFormData(prev => ({ ...prev, template_id: template.id }))}
-                >
-                  <div className="h-32 bg-gradient-to-br from-primary/20 via-accent/10 to-secondary/20 flex items-center justify-center text-4xl">
-                    📄
-                  </div>
-                  <CardContent className="pt-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold">{template.name}</h3>
-                        {formData.template_id === template.id && (
-                          <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                            <Check className="h-4 w-4 text-primary-foreground" />
-                          </div>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground line-clamp-2">{template.description}</p>
-                      <Badge variant="success">✓ {template.success_rate}% 달성</Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {step === 2 && (
-          <div className="space-y-6 animate-fade-in">
-            <div className="text-center space-y-2">
-              <h2 className="text-2xl font-bold">프로젝트 정보를 입력하세요</h2>
-              <p className="text-muted-foreground">AI가 이 정보를 바탕으로 최적의 페이지를 생성합니다</p>
-            </div>
-
-            <Card className="max-w-2xl mx-auto">
-              <CardContent className="pt-6 space-y-6">
+          {/* 프로젝트 정보 입력 */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                프로젝트 정보
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  프로젝트명 <span className="text-destructive">*</span>
+                </label>
                 <Input
-                  label="프로젝트 이름 *"
-                  placeholder="예: 2024 스마트 텀블러 펀딩"
+                  placeholder="예: 혁신적인 무선 이어폰 출시 프로젝트"
                   value={formData.project_name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, project_name: e.target.value }))}
+                  onChange={(e) => setFormData({ ...formData, project_name: e.target.value })}
                 />
+              </div>
 
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  제품명 <span className="text-destructive">*</span>
+                </label>
                 <Input
-                  label="제품명 *"
-                  placeholder="예: 스마트 온도 유지 텀블러"
+                  placeholder="예: AirPods Ultra Pro"
                   value={formData.product_name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, product_name: e.target.value }))}
+                  onChange={(e) => setFormData({ ...formData, product_name: e.target.value })}
                 />
+              </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">핵심 강점 (USP) *</label>
-                  <textarea
-                    className="w-full h-24 rounded-lg border border-white/10 bg-secondary px-4 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                    placeholder="예: 24시간 온도 유지 + UV-C 자동 살균 기능"
-                    value={formData.usp}
-                    onChange={(e) => setFormData(prev => ({ ...prev, usp: e.target.value }))}
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  제품 설명 <span className="text-destructive">*</span>
+                </label>
+                <textarea
+                  className="w-full min-h-[120px] rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  placeholder="제품의 핵심 가치와 특징을 자유롭게 작성해주세요..."
+                  value={formData.product_description}
+                  onChange={(e) => setFormData({ ...formData, product_description: e.target.value })}
+                />
+              </div>
 
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  타겟 고객
+                </label>
                 <Input
-                  label="타겟 고객 *"
-                  placeholder="예: 바쁜 일상 속 건강을 챙기고 싶은 20-30대 직장인"
+                  placeholder="예: 20-30대 직장인, 운동을 즐기는 사람들"
                   value={formData.target_audience}
-                  onChange={(e) => setFormData(prev => ({ ...prev, target_audience: e.target.value }))}
+                  onChange={(e) => setFormData({ ...formData, target_audience: e.target.value })}
                 />
+              </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">브랜드 톤앤매너</label>
-                  <div className="grid grid-cols-3 gap-3">
-                    {[
-                      { value: 'professional', label: '전문적', emoji: '💼' },
-                      { value: 'friendly', label: '친근한', emoji: '😊' },
-                      { value: 'premium', label: '프리미엄', emoji: '✨' },
-                    ].map((tone) => (
-                      <button
-                        key={tone.value}
-                        onClick={() => setFormData(prev => ({ ...prev, brand_tone: tone.value as any }))}
-                        className={`
-                          p-4 rounded-lg border transition-all
-                          ${formData.brand_tone === tone.value
-                            ? 'border-primary bg-primary/10 text-primary'
-                            : 'border-white/10 hover:border-white/30'
-                          }
-                        `}
-                      >
-                        <div className="text-2xl mb-2">{tone.emoji}</div>
-                        <div className="font-medium">{tone.label}</div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">플랫폼 선택</label>
-                  <div className="grid grid-cols-2 gap-3">
-                    {[
-                      { value: 'wadiz', label: '와디즈', emoji: '🚀' },
-                      { value: 'smartstore', label: '스마트스토어', emoji: '🛒' },
-                      { value: 'coupang', label: '쿠팡', emoji: '📦' },
-                      { value: 'gmarket', label: 'G마켓', emoji: '🏪' },
-                    ].map((platform) => (
-                      <label
-                        key={platform.value}
-                        className={`
-                          flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-all
-                          ${formData.platforms.includes(platform.value)
-                            ? 'border-primary bg-primary/10'
-                            : 'border-white/10 hover:border-white/30'
-                          }
-                        `}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={formData.platforms.includes(platform.value)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setFormData(prev => ({ ...prev, platforms: [...prev.platforms, platform.value] }));
-                            } else {
-                              setFormData(prev => ({ ...prev, platforms: prev.platforms.filter(p => p !== platform.value) }));
-                            }
-                          }}
-                          className="w-5 h-5 rounded border-primary text-primary focus:ring-primary"
-                        />
-                        <span className="text-2xl">{platform.emoji}</span>
-                        <span className="font-medium">{platform.label}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {step === 3 && (
-          <div className="space-y-6 animate-fade-in">
-            <div className="text-center space-y-2">
-              <h2 className="text-2xl font-bold">생성 준비 완료!</h2>
-              <p className="text-muted-foreground">AI가 약 3초 안에 최적의 페이지를 만들어드립니다</p>
-            </div>
-
-            <Card className="max-w-2xl mx-auto">
-              <CardContent className="pt-6 space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <div className="text-sm text-muted-foreground">프로젝트 이름</div>
-                    <div className="font-medium">{formData.project_name}</div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="text-sm text-muted-foreground">제품명</div>
-                    <div className="font-medium">{formData.product_name}</div>
-                  </div>
-                  <div className="space-y-2 col-span-2">
-                    <div className="text-sm text-muted-foreground">핵심 강점</div>
-                    <div className="font-medium">{formData.usp}</div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="text-sm text-muted-foreground">타겟 고객</div>
-                    <div className="font-medium">{formData.target_audience}</div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="text-sm text-muted-foreground">브랜드 톤</div>
-                    <div className="font-medium capitalize">{formData.brand_tone}</div>
-                  </div>
-                  <div className="space-y-2 col-span-2">
-                    <div className="text-sm text-muted-foreground">플랫폼</div>
-                    <div className="flex gap-2">
-                      {formData.platforms.map(p => (
-                        <Badge key={p}>{p}</Badge>
-                      ))}
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  주요 특징 (최대 10개)
+                </label>
+                <div className="space-y-2">
+                  {formData.key_features.map((feature, index) => (
+                    <div key={index} className="flex gap-2">
+                      <Input
+                        placeholder={`특징 ${index + 1}`}
+                        value={feature}
+                        onChange={(e) => handleFeatureChange(index, e.target.value)}
+                      />
+                      {formData.key_features.length > 1 && (
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => removeFeature(index)}
+                        >
+                          ✕
+                        </Button>
+                      )}
                     </div>
-                  </div>
+                  ))}
+                  {formData.key_features.length < 10 && (
+                    <Button
+                      variant="outline"
+                      onClick={addFeature}
+                      className="w-full"
+                    >
+                      + 특징 추가
+                    </Button>
+                  )}
                 </div>
+              </div>
+            </CardContent>
+          </Card>
 
-                <div className="pt-4 border-t border-white/10">
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground mb-4">
-                    <Sparkles className="h-5 w-5 text-primary" />
-                    <span>AI가 다음을 생성합니다:</span>
-                  </div>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-green-500" />
-                      와디즈 5단계 황금구조 페이지
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-green-500" />
-                      감성적 카피라이팅 + 3가지 대안
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-green-500" />
-                      플랫폼별 최적화 레이아웃
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-green-500" />
-                      썸네일 + GIF 추천
-                    </li>
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        <div className="flex items-center justify-between max-w-2xl mx-auto pt-8">
-          <Button
-            variant="ghost"
-            onClick={handleBack}
-            disabled={step === 1 || loading}
-            className="gap-2"
-          >
-            <ArrowLeft className="h-5 w-5" />
-            이전
-          </Button>
-
-          {step < 3 ? (
+          {/* 생성 버튼 */}
+          <div className="flex justify-end gap-4">
             <Button
-              onClick={handleNext}
-              disabled={!isStepValid()}
-              className="gap-2"
+              variant="outline"
+              onClick={() => navigate('/dashboard')}
+              disabled={loading}
             >
-              다음
-              <ArrowRight className="h-5 w-5" />
+              취소
             </Button>
-          ) : (
             <Button
               onClick={handleGenerate}
-              loading={loading}
               disabled={loading}
-              size="lg"
-              className="gap-2"
+              className="min-w-[200px]"
             >
-              <Sparkles className="h-5 w-5" />
-              {loading ? 'AI 생성 중...' : 'AI로 생성하기'}
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  AI 생성 중...
+                </>
+              ) : (
+                <>
+                  <Zap className="mr-2 h-4 w-4" />
+                  AI로 페이지 생성하기
+                </>
+              )}
             </Button>
-          )}
+          </div>
         </div>
       </div>
     </div>
   );
 };
+
+export default CreateProjectPage;
