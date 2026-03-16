@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Download, Eye, EyeOff, Share2, Settings, Code } from 'lucide-react';
+import { ArrowLeft, Download, Eye, Share2, Settings, Code } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { api } from '../lib/api';
@@ -246,7 +246,11 @@ export const ProjectDetailPage: React.FC = () => {
         >
           <Card
             className="w-full max-w-md p-6 space-y-4 animate-scale-in"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e: React.MouseEvent) => {
+  e.stopPropagation();
+  setShowExportModal(true);
+}}
+
           >
             <h2 className="text-2xl font-bold">플랫폼 선택</h2>
             <p className="text-muted-foreground">어느 플랫폼으로 내보낼까요?</p>
