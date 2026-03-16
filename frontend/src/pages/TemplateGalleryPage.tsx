@@ -30,7 +30,7 @@ interface Template {
 }
 
 export const TemplateGalleryPage: React.FC = () => {
-  const [categories, setCategories] = useState<TemplateCategory[]>([]);
+  const [categories] = useState<TemplateCategory[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -45,14 +45,11 @@ export const TemplateGalleryPage: React.FC = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [categoriesRes, templatesRes] = await Promise.all([
-        api.getTemplates(),
-        api.getTemplates()
-      ]);
-      setCategories(categoriesRes);
-      setTemplates(templatesRes);
+      const templatesData = await api.getTemplates();
+      setTemplates(templatesData);
     } catch (error) {
       console.error('데이터 로딩 실패:', error);
+      setTemplates([]);
     } finally {
       setLoading(false);
     }
