@@ -1,5 +1,4 @@
-# Backend Dependencies for Wadiz Page Builder SaaS
-# FastAPI & ASGI
+# FastAPI Core
 fastapi==0.109.0
 uvicorn[standard]==0.27.0
 python-multipart==0.0.6
@@ -13,37 +12,24 @@ psycopg2-binary==2.9.9
 # Authentication
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
+
+# Configuration
 python-dotenv==1.0.1
-
-# AI Integration (Hybrid: Gemini + OpenAI)
-google-generativeai==0.3.2  # Gemini 2.0 Flash (1차 생성 - 무료/빠름)
-openai==1.12.0  # GPT-4 Turbo (2차 다듬기 - 고품질)
-anthropic==0.18.1
-
-# Image Processing
-Pillow==10.2.0
-boto3==1.34.34  # AWS S3
-
-# Template Engine
-Jinja2==3.1.3
-
-# Background Tasks
-celery==5.3.6
-redis==5.0.1
-
-# HTTP Client
-httpx==0.26.0
-requests==2.31.0
-
-# Utils
 pydantic==2.6.0
 pydantic-settings==2.1.0
-email-validator==2.1.0
-python-slugify==8.0.2
 
-# Development
-pytest==8.0.0
-pytest-asyncio==0.23.4
-black==24.1.1
-flake8==7.0.0
-mypy==1.8.0
+# AI APIs
+openai==1.12.0
+google-generativeai==0.3.1
+
+# HTTP & Web Scraping
+httpx==0.26.0
+requests==2.31.0
+beautifulsoup4==4.12.3
+lxml==5.1.0
+
+# Templates
+jinja2==3.1.3
+
+# Utils
+python-slugify==8.0.2
