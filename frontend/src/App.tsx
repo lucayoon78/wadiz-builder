@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Sparkles, LogOut, Menu, X, RefreshCw } from 'lucide-react';
 import LoginPage from './pages/LoginPage';
@@ -7,6 +7,7 @@ import { TemplateGalleryPage } from './pages/TemplateGalleryPage';
 import { CreateProjectPage } from './pages/CreateProjectPage';
 import { ProjectDetailPage } from './pages/ProjectDetailPage';
 import { RenewalPage } from './pages/RenewalPage';
+import type { User } from './types';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
@@ -128,11 +129,13 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 };
 
 function App() {
+  const [user, setUser] = useState<User | null>(null);
+
   return (
     <BrowserRouter>
       <Layout>
         <Routes>
-          <Route path="/login" element={<LoginPage />} />
+          <Route path="/login" element={<LoginPage setUser={setUser} />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/templates" element={<TemplateGalleryPage />} />
           <Route path="/create" element={<CreateProjectPage />} />
