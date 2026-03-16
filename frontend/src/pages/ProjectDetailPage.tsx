@@ -29,8 +29,8 @@ export const ProjectDetailPage: React.FC = () => {
   const loadProject = async () => {
     try {
       setLoading(true);
-      const response = await api.get(`/projects/${id}`);
-      setProject(response.data);
+      const response = await api.getProject(parseInt(id!));
+      setProject(response);
     } catch (error) {
       console.error('프로젝트 로딩 실패:', error);
     } finally {
@@ -40,15 +40,9 @@ export const ProjectDetailPage: React.FC = () => {
 
   const handleExport = async (platform: string) => {
     try {
-      const response = await api.post('/multi-platform/multi-platform-export', {
-        project_id: parseInt(id!),
-        platforms: [platform],
-        generate_thumbnails: true,
-        generate_gifs: true,
-      });
+      const response = await api.exportHTML(parseInt(id!));
       
-      // 다운로드 처리
-      const blob = new Blob([response.data.exports[0].html_content], { type: 'text/html' });
+      const blob = new Blob([response.html_content], { type: 'text/html' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -91,7 +85,6 @@ export const ProjectDetailPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* 상단 툴바 */}
       <div className="border-b border-white/10 bg-card sticky top-0 z-50">
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
@@ -108,12 +101,11 @@ export const ProjectDetailPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* 프리뷰 모드 */}
             <div className="flex items-center gap-2 bg-secondary rounded-lg p-1">
               {[
-                { mode: 'desktop' as const, label: '🖥️', width: '100%' },
-                { mode: 'tablet' as const, label: '📱', width: '768px' },
-                { mode: 'mobile' as const, label: '📱', width: '375px' },
+                { mode: 'desktop' as const, label: '🖥️' },
+                { mode: 'tablet' as const, label: '📱' },
+                { mode: 'mobile' as const, label: '📱' },
               ].map((m) => (
                 <button
                   key={m.mode}
@@ -146,9 +138,7 @@ export const ProjectDetailPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 메인 컨텐츠 - 2컬럼 레이아웃 */}
       <div className="flex h-[calc(100vh-73px)]">
-        {/* 좌측: 컨트롤 패널 */}
         <div className="w-80 border-r border-white/10 bg-card overflow-y-auto">
           <div className="p-6 space-y-6">
             <div className="space-y-2">
@@ -214,7 +204,6 @@ export const ProjectDetailPage: React.FC = () => {
           </div>
         </div>
 
-        {/* 우측: 라이브 프리뷰 */}
         <div className="flex-1 bg-muted/20 overflow-auto p-6">
           <div className="flex justify-center">
             <div
@@ -238,7 +227,6 @@ export const ProjectDetailPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 내보내기 모달 (간단 버전) */}
       {showExportModal && (
         <div
           className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 animate-fade-in"
