@@ -39,6 +39,7 @@ class Settings(BaseSettings):
     
     # CORS
     CORS_ORIGINS_STR: str = Field(default='["*"]')
+    BACKEND_CORS_ORIGINS: List[str] = ["*"]
     
     @property
     def CORS_ORIGINS(self) -> List[str]:
