@@ -36,7 +36,6 @@ export const TemplateGalleryPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'popular' | 'success' | 'recent'>('popular');
   const [loading, setLoading] = useState(true);
-  const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -197,56 +196,4 @@ export const TemplateGalleryPage: React.FC = () => {
                       variant="primary"
                       className="opacity-0 group-hover:opacity-100 transform scale-95 group-hover:scale-100 transition-all"
                       onClick={() => selectTemplate(template)}
-                    >
-                      <Eye className="h-5 w-5 mr-2" />
-                      미리보기
-                    </Button>
-                  </div>
-                </div>
-
-                <CardHeader>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="default">
-                        {categories.find(c => c.id === template.category_id)?.display_name || '일반'}
-                      </Badge>
-                      <Badge variant="success">
-                        ✓ {template.success_rate}% 달성
-                      </Badge>
-                    </div>
-                    <CardTitle className="text-lg">{template.name}</CardTitle>
-                    <CardDescription className="line-clamp-2">
-                      {template.description}
-                    </CardDescription>
-                  </div>
-                </CardHeader>
-
-                <CardContent>
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-1 text-muted-foreground">
-                      <TrendingUp className="h-4 w-4" />
-                      평균 {formatFundingAmount(template.avg_funding_amount)}원
-                    </div>
-                    <div className="flex items-center gap-1 text-muted-foreground">
-                      <Eye className="h-4 w-4" />
-                      {template.usage_count}회 사용
-                    </div>
-                  </div>
-                </CardContent>
-
-                <CardFooter>
-                  <Button
-                    className="w-full"
-                    onClick={() => selectTemplate(template)}
-                  >
-                    이 템플릿 사용하기
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
+                    ><span class="cursor">█</span>
