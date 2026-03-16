@@ -6,9 +6,10 @@ import json
 class Settings(BaseSettings):
     # 프로젝트 기본 정보
     PROJECT_NAME: str = "Wadiz Page Builder"
+    APP_NAME: str = "Wadiz Page Builder"  # ✅ 추가된 필드
     VERSION: str = "4.2.0"
     API_V1_STR: str = "/api/v1"
-    API_V1_PREFIX: str = "/api/v1"  # ✅ 누락된 필드 추가
+    API_V1_PREFIX: str = "/api/v1"
     
     # 데이터베이스
     DATABASE_URL: str = Field(
@@ -34,6 +35,32 @@ class Settings(BaseSettings):
     def CORS_ORIGINS(self) -> List[str]:
         try:
             return json.loads(self.CORS_ORIGINS_STR)
+        except:
+            return ["*"]
+    
+    # AWS S3 (선택사항)
+    AWS_ACCESS_KEY_ID: str = ""
+    AWS_SECRET_ACCESS_KEY: str = ""
+    AWS_REGION: str = "ap-northeast-2"
+    S3_BUCKET_NAME: str = ""
+    
+    # JWT (선택사항)
+    JWT_SECRET_KEY: str = Field(
+        default="wadiz-builder-jwt-secret-key-minimum-32-characters-required",
+        min_length=32
+    )
+    JWT_ALGORITHM: str = "HS256"
+    
+    # 디버그 모드
+    DEBUG: bool = False
+    
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
+        case_sensitive = True
+        extra = "allow"  # 추가 환경변수 허용
+
+settings = Settings()
         except:
             return ["*"]
     
