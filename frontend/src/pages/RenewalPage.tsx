@@ -4,8 +4,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
-import { useNavigate } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import { api } from '../lib/api';
 import { useToast } from '../components/ui/Toast';
 
 interface AnalysisResult {
