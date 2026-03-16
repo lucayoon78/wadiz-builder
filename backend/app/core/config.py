@@ -7,6 +7,7 @@ import json
 class Settings(BaseSettings):
     # 앱 기본 정보
     APP_NAME: str = "Wadiz Page Builder"
+    APP_VERSION: str = "4.2.0"
     PROJECT_NAME: str = "Wadiz Page Builder"
     VERSION: str = "4.2.0"
     
