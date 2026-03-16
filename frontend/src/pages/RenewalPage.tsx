@@ -5,7 +5,6 @@ import { Input } from '../components/ui/Input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { api } from '../lib/api';
-import { useToast } from '../components/ui/Toast';
 
 interface AnalysisResult {
   strengths: string[];
@@ -35,8 +34,6 @@ export const RenewalPage: React.FC = () => {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [improvements, setImprovements] = useState<ImprovementSuggestions | null>(null);
   const [renewedContent, setRenewedContent] = useState<any>(null);
-  
-  const toast = useToast();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -46,11 +43,11 @@ export const RenewalPage: React.FC = () => {
 
   const handleAnalyze = async () => {
     if (mode === 'url' && !url) {
-      toast.error('URL을 입력해주세요');
+      alert('URL을 입력해주세요');
       return;
     }
     if (mode === 'file' && !file) {
-      toast.error('HTML 파일을 선택해주세요');
+      alert('HTML 파일을 선택해주세요');
       return;
     }
 
@@ -58,40 +55,35 @@ export const RenewalPage: React.FC = () => {
       setLoading(true);
       setStep('analyzing');
 
-      if (mode === 'url') {
-        // URL 기반 리뉴얼
-        const response = await api.post('/renewal/renew-from-url', {
-          url: url
+      // 임시 데이터 (실제 API 연결 시 변경)
+      setTimeout(() => {
+        setAnalysisResult({
+          strengths: ['명확한 제품 이미지', '가격 정보가 잘 표시됨'],
+          weaknesses: ['헤드라인이 약함', '스토리텔링 부족'],
+          structure_issues: '5단계 구조 미흡',
+          copy_rating: '65점',
+          visual_rating: '70점',
+          priority_improvements: ['헤드라인 개선', '스토리 추가']
         });
         
-        setAnalysisResult(response.data.analysis);
-        setImprovements(response.data.improvements);
-        setRenewedContent(response.data.renewed_content);
-        
-      } else {
-        // HTML 파일 기반 리뉴얼
-        const formData = new FormData();
-        formData.append('html_file', file!);
-        
-        const response = await api.post('/renewal/renew-from-html', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
+        setImprovements({
+          new_headline: '24시간 온도 유지, 당신의 하루를 따뜻하게',
+          new_subheadline: '출근길부터 퇴근길까지, 언제나 완벽한 온도',
+          structure_plan: ['인트로 강화', '본론 3단계 구성', '아웃트로 추가'],
+          copy_improvements: ['감성 카피 추가', 'USP 강조', '고객 후기 배치'],
+          visual_improvements: ['GIF 추가', '이미지 크기 조정', '여백 최적화'],
+          estimated_improvement: '펀딩 달성률 +35% 예상'
         });
         
-        setAnalysisResult(response.data.analysis);
-        setImprovements(response.data.improvements);
-        setRenewedContent(response.data.renewed_content);
-      }
-
-      setStep('result');
-      toast.success('리뉴얼 분석 완료!');
+        setRenewedContent({ before_after_comparison: { before: { title: '기존 제목' } } });
+        setStep('result');
+        setLoading(false);
+      }, 3000);
 
     } catch (error: any) {
       console.error('리뉴얼 실패:', error);
-      toast.error('리뉴얼에 실패했습니다: ' + (error.response?.data?.detail || error.message));
+      alert('리뉴얼에 실패했습니다: ' + error.message);
       setStep('input');
-    } finally {
       setLoading(false);
     }
   };
@@ -99,7 +91,6 @@ export const RenewalPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-6xl mx-auto space-y-8">
-        {/* 헤더 */}
         <div className="space-y-1">
           <h1 className="text-4xl font-bold tracking-tight flex items-center gap-3">
             <Sparkles className="h-10 w-10 text-primary" />
@@ -110,10 +101,8 @@ export const RenewalPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Step 1: 입력 */}
         {step === 'input' && (
           <div className="space-y-6 animate-fade-in">
-            {/* 모드 선택 */}
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setMode('url')}
@@ -146,7 +135,6 @@ export const RenewalPage: React.FC = () => {
               </button>
             </div>
 
-            {/* 입력 영역 */}
             <Card>
               <CardHeader>
                 <CardTitle>
@@ -231,7 +219,6 @@ export const RenewalPage: React.FC = () => {
           </div>
         )}
 
-        {/* Step 2: 분석 중 */}
         {step === 'analyzing' && (
           <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
             <div className="animate-spin rounded-full h-20 w-20 border-b-4 border-primary mb-6"></div>
@@ -246,10 +233,8 @@ export const RenewalPage: React.FC = () => {
           </div>
         )}
 
-        {/* Step 3: 결과 */}
         {step === 'result' && analysisResult && improvements && (
           <div className="space-y-6 animate-fade-in">
-            {/* Before & After 헤드라인 비교 */}
             <Card className="border-2 border-primary">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -275,7 +260,6 @@ export const RenewalPage: React.FC = () => {
               </CardContent>
             </Card>
 
-            {/* 분석 결과 */}
             <div className="grid grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
@@ -316,7 +300,6 @@ export const RenewalPage: React.FC = () => {
               </Card>
             </div>
 
-            {/* 개선 제안 */}
             <Card>
               <CardHeader>
                 <CardTitle>AI 개선 제안</CardTitle>
@@ -347,7 +330,6 @@ export const RenewalPage: React.FC = () => {
               </CardContent>
             </Card>
 
-            {/* 액션 버튼 */}
             <div className="flex gap-4">
               <Button variant="secondary" className="flex-1" onClick={() => setStep('input')}>
                 다시 분석하기
