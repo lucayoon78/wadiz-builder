@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Sparkles, LogOut, Menu, X, RefreshCw } from 'lucide-react';
-import { LoginPage } from './pages/LoginPage';
+import LoginPage from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { TemplateGalleryPage } from './pages/TemplateGalleryPage';
 import { CreateProjectPage } from './pages/CreateProjectPage';
