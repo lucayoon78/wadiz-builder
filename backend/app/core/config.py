@@ -39,7 +39,11 @@ class Settings(BaseSettings):
     
     # CORS
     CORS_ORIGINS_STR: str = Field(default='["*"]')
-    BACKEND_CORS_ORIGINS: List[str] = ["*"]
+    BACKEND_CORS_ORIGINS: List[str] = [
+        "https://wadiz-builder.vercel.app",
+        "http://localhost:3000",
+        "http://localhost:5173"
+    ]
     
     @property
     def CORS_ORIGINS(self) -> List[str]:
