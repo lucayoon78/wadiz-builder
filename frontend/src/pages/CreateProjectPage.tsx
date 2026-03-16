@@ -23,7 +23,6 @@ export const CreateProjectPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Form data
   const [formData, setFormData] = useState({
     template_id: (location.state as any)?.templateId || null,
     project_name: '',
@@ -40,15 +39,15 @@ export const CreateProjectPage: React.FC = () => {
 
   const loadTemplates = async () => {
     try {
-      const response = await api.get('/templates-enhanced/');
-      setTemplates(response.data);
-      // 상태에서 전달받은 템플릿이 있으면 자동 선택
+      const response = await api.getTemplates();
+      setTemplates(response);
       if ((location.state as any)?.templateId) {
         setFormData(prev => ({ ...prev, template_id: (location.state as any).templateId }));
-        setStep(2); // 템플릿 이미 선택되었으므로 2단계로
+        setStep(2);
       }
     } catch (error) {
       console.error('템플릿 로딩 실패:', error);
+      setTemplates([]);
     }
   };
 
@@ -63,18 +62,15 @@ export const CreateProjectPage: React.FC = () => {
   const handleGenerate = async () => {
     try {
       setLoading(true);
-      const response = await api.post('/multi-platform/quick-generate', {
-        template_id: formData.template_id,
+      const response = await api.generateWadizPage({
+        template_id: formData.template_id!,
         product_name: formData.product_name,
         usp: formData.usp,
         target_audience: formData.target_audience,
         brand_tone: formData.brand_tone,
-        platforms: formData.platforms,
-        project_name: formData.project_name,
       });
       
-      // 생성 완료 후 프로젝트 상세 페이지로 이동
-      navigate(`/project/${response.data.project_id}`);
+      navigate(`/project/${response.project_id}`);
     } catch (error) {
       console.error('생성 실패:', error);
       alert('프로젝트 생성에 실패했습니다.');
@@ -92,7 +88,6 @@ export const CreateProjectPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-5xl mx-auto space-y-8">
-        {/* 헤더 */}
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate('/dashboard')}
@@ -106,7 +101,6 @@ export const CreateProjectPage: React.FC = () => {
           </div>
         </div>
 
-        {/* 진행 단계 */}
         <div className="flex items-center justify-between max-w-2xl mx-auto">
           {[
             { num: 1, label: '템플릿 선택' },
@@ -139,7 +133,6 @@ export const CreateProjectPage: React.FC = () => {
           ))}
         </div>
 
-        {/* Step 1: 템플릿 선택 */}
         {step === 1 && (
           <div className="space-y-6 animate-fade-in">
             <div className="text-center space-y-2">
@@ -180,7 +173,6 @@ export const CreateProjectPage: React.FC = () => {
           </div>
         )}
 
-        {/* Step 2: 정보 입력 */}
         {step === 2 && (
           <div className="space-y-6 animate-fade-in">
             <div className="text-center space-y-2">
@@ -289,7 +281,6 @@ export const CreateProjectPage: React.FC = () => {
           </div>
         )}
 
-        {/* Step 3: AI 생성 */}
         {step === 3 && (
           <div className="space-y-6 animate-fade-in">
             <div className="text-center space-y-2">
@@ -359,7 +350,6 @@ export const CreateProjectPage: React.FC = () => {
           </div>
         )}
 
-        {/* 네비게이션 버튼 */}
         <div className="flex items-center justify-between max-w-2xl mx-auto pt-8">
           <Button
             variant="ghost"
