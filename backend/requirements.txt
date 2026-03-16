@@ -3,9 +3,10 @@ fastapi==0.109.0
 uvicorn[standard]==0.27.0
 python-multipart==0.0.6
 
-# Database
+# Database - asyncpg (비동기) 추가, psycopg2 유지 (혹시 모를 경우)
 sqlalchemy==2.0.25
 alembic==1.13.1
+asyncpg==0.29.0
 psycopg2-binary==2.9.9
 
 # Authentication
